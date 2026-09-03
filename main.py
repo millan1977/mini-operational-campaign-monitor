@@ -2,18 +2,21 @@ import json
 from pathlib import Path
 from datetime import datetime
 from metrics import calcular_dias_totales, calcular_dias_transcurridos, calcular_delivery_ratio, calcular_time_ratio, calcular_osi
+from api_client import adaptar_dataset_api_sample
 
 base_path = Path(__file__).parent
-json_file = "line_items.json"
+json_file = "api_line_items_sample.json"
 json_path = base_path / json_file
 with open(json_path, "r") as file:
     dataset = json.load(file)
+
+dataset_normalizado = adaptar_dataset_api_sample(dataset)
 
 print("Mini Operational Campaign Monitor")
 
 today = datetime.now()
 
-for li in dataset:
+for li in dataset_normalizado:
     start_date = datetime.strptime(li["LineItem_StartDate"], "%d-%m-%Y %H:%M")
     end_date = datetime.strptime(li["LineItem_EndDate"], "%d-%m-%Y %H:%M")
     delivery_ratio = calcular_delivery_ratio(li["Lifetime_Impressions"], li["Contracted_Impressions"])
