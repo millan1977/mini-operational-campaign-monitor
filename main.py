@@ -1,14 +1,15 @@
-import json
-from pathlib import Path
-from datetime import datetime
 from metrics import calcular_dias_totales, calcular_dias_transcurridos, calcular_delivery_ratio, calcular_time_ratio, calcular_osi
-from api_client import adaptar_dataset_api_sample
+from api_client import adaptar_dataset_api_sample, obtener_datos_api
+from datetime import datetime
 
-base_path = Path(__file__).parent
-json_file = "api_line_items_sample.json"
-json_path = base_path / json_file
-with open(json_path, "r") as file:
-    dataset = json.load(file)
+url = "http://localhost:8000/api_line_items_sample.json"
+params={}
+headers = {
+    "Accept":"application/json"
+}
+timeout = 5
+
+dataset = obtener_datos_api(url, params, headers, timeout)
 
 dataset_normalizado = adaptar_dataset_api_sample(dataset)
 
