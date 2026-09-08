@@ -1,31 +1,38 @@
-from metrics import calcular_dias_totales, calcular_dias_transcurridos, calcular_delivery_ratio, calcular_time_ratio, calcular_osi
-from api_client import adaptar_dataset_api_sample, obtener_datos_api
+from metrics import enriquecer_dataset_metricas
+from api_client import adaptar_dataset_api_sample, obtener_todas_las_paginas, extraer_datos_resultado_api
 from datetime import datetime
+import os
+from dotenv import load_dotenv
+import logging
 
-url = "http://localhost:8000/api_line_items_sample.json"
-params={}
-headers = {
-    "Accept":"application/json"
+logging.basicConfig(level=logging.INFO)
+load_dotenv()
+
+token = os.getenv("REQRES_API_KEY")
+
+url = "https://reqres.in/api/collections/line_items/records?"
+params={
+    "project_id" : 49465
+}
+headers = headers = {
+    "Accept": "application/json",
+    "Content-Type": "application/json",
+    "x-api-key": token,
+    "X-Reqres-Env": "prod"
 }
 timeout = 5
 
-dataset = obtener_datos_api(url, params, headers, timeout)
+dataset = dataset = obtener_todas_las_paginas(
+    url, 
+    params, 
+    headers, 
+    timeout
+)
+data = extraer_datos_resultado_api(dataset)
+dataset_normalizado = adaptar_dataset_api_sample(data)
 
-dataset_normalizado = adaptar_dataset_api_sample(dataset)
-
-print("Mini Operational Campaign Monitor")
+logging.info("Mini Operational Campaign Monitor")
 
 today = datetime.now()
 
-for li in dataset_normalizado:
-    start_date = datetime.strptime(li["LineItem_StartDate"], "%d-%m-%Y %H:%M")
-    end_date = datetime.strptime(li["LineItem_EndDate"], "%d-%m-%Y %H:%M")
-    delivery_ratio = calcular_delivery_ratio(li["Lifetime_Impressions"], li["Contracted_Impressions"])
-    dias_totales = calcular_dias_totales(start_date, end_date)
-    elapsed_days = calcular_dias_transcurridos(today, start_date)
-    time_ratio = calcular_time_ratio(elapsed_days, dias_totales)
-    osi = calcular_osi(delivery_ratio, time_ratio)
-    if osi is None:
-        print(f"El OSI para la linea {li['LineItem_Name']} es N/A")
-    else:
-        print(f"El OSI para la linea {li['LineItem_Name']} es {osi:.2%}")
+dataset_enriquecido = enriquecer_dataset_metricas(dataset_normalizado, today)
