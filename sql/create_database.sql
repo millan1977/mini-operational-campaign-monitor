@@ -1,0 +1,1 @@
+CREATE DATABASE campaign_monitor;
