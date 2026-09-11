@@ -1,6 +1,7 @@
 import os
 import psycopg
 from dotenv import load_dotenv
+import logging
 
 load_dotenv()
 
@@ -19,6 +20,8 @@ def insertar_snapshots(dataset_enriquecido):
     from datetime import datetime
     with conexion_db() as conexion:
         with conexion.cursor() as cursor:
+            insertados = 0
+            omitidos = 0
             for registro in dataset_enriquecido:
                 start_date = datetime.strptime(
                     registro["LineItem_StartDate"],
@@ -56,7 +59,9 @@ def insertar_snapshots(dataset_enriquecido):
                         %s, %s, %s, %s, %s,
                         %s, %s, %s, %s, %s,
                         %s, %s, %s, %s
-                    );
+                    )
+                    ON CONFLICT (line_item_id, snapshot_date)
+                    DO NOTHING;
                     """,
                     (
                         registro["LineItem_ID"],
@@ -80,3 +85,13 @@ def insertar_snapshots(dataset_enriquecido):
                         registro["osi"]
                     )
                 )
+
+                if cursor.rowcount == 1:
+                    insertados += 1
+                else:
+                    omitidos += 1
+        logging.info(
+        "PostgreSQL: %s snapshots insertados, %s omitidos",
+        insertados,
+        omitidos
+        )
