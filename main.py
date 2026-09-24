@@ -13,7 +13,7 @@ load_dotenv()
 
 token = os.getenv("REQRES_API_KEY")
 
-url = "https://reqres.in/api/collections/line_items/records?"
+url = "https://reqres.in/api/collections/line-item/records?"
 params={
     "project_id" : 49465
 }
