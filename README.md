@@ -150,6 +150,7 @@ With PostgreSQL installed and running:
 2. Run `sql/create_database.sql`.
 3. Connect to the new `campaign_monitor` database.
 4. Run `sql/schema.sql`.
+5. Run `sql/create_monitor_view.sql`.
 
 ### 5. Run Campaign Monitor
 
